@@ -197,4 +197,4 @@ error-state.png → Negative scenario
 
 success-state.png → Positive scenario
 
-Dropdown logic validation screenshot (optional)
+logic validation screenshot 
