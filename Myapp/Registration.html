@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Intelligent Registration System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    * {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", sans-serif;
+    }
+
+    /* FULL SCREEN, NO SCROLL */
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1150px;
+      max-height: 95vh;
+      overflow: hidden;
+      background: rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 22px 28px;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.18);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    h1 { color: #fff; margin-bottom: 6px; font-size: 1.7rem; }
+
+    .badge {
+      background: rgba(255,255,255,0.15);
+      padding: 4px 10px;
+      color: #c7d2fe;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-dot {
+      width: 8px; height: 8px;
+      background:#22c55e; border-radius:50%;
+    }
+
+    .alert {
+      display: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .alert-success { background:#ecfdf5; color:#065f46; border-left:4px solid #10b981; }
+    .alert-error   { background:#fef2f2; color:#991b1b; border-left:4px solid #ef4444; }
+
+    /* GRID Layout - 3 Columns */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px 20px;
+      flex: 1;
+      align-items: start;
+    }
+
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.error input, .form-group.error select {
+      border-color: #ef4444;
+      background: rgba(255,0,0,0.08);
+    }
+
+    label { color:#e2e8f0; font-size:0.82rem; margin-bottom:4px; }
+    .required { color:#fb7185; }
+
+    input, select {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    select option { background:#1e293b; }
+
+    .error-text { color:#f87171; font-size:0.75rem; height:12px; }
+
+    .password-strength {
+      height: 4px;
+      background: rgba(255,255,255,0.12);
+      margin-top: 5px;
+    }
+    .password-strength-bar { height:100%; width:0%; transition:0.3s; }
+    .strength-weak { width:33%; background:#ef4444; }
+    .strength-medium { width:66%; background:#f59e0b; }
+    .strength-strong { width:100%; background:#10b981; }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius:10px;
+      border:none;
+      background: linear-gradient(135deg,#3b82f6,#6366f1);
+      color:white;
+      font-weight:600;
+      margin-top: 8px;
+      opacity:0.5;
+      pointer-events:none;
+    }
+    button.enabled { opacity:1; pointer-events:auto; }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- TOP ALERTS -->
+    <div id="formSuccessMessage" class="alert alert-success">
+      ✅ Registration Successful!
+    </div>
+
+    <div id="formErrorSummary" class="alert alert-error"></div>
+
+    <span class="badge"><span class="badge-dot"></span> Intelligent Registration System</span>
+    <h1>Candidate Registration</h1>
+
+    <form id="registrationForm">
+      
+      <!-- === GRID (All Inputs Visible Non-Scrollable) === -->
+      <div class="grid">
+
+        <div class="form-group" id="firstNameGroup">
+          <label>First Name <span class="required">*</span></label>
+          <input id="firstName">
+          <span class="error-text" id="firstNameError"></span>
+        </div>
+
+        <div class="form-group" id="lastNameGroup">
+          <label>Last Name <span class="required">*</span></label>
+          <input id="lastName">
+          <span class="error-text" id="lastNameError"></span>
+        </div>
+
+        <div class="form-group" id="emailGroup">
+          <label>Email <span class="required">*</span></label>
+          <input id="email">
+          <span class="error-text" id="emailError"></span>
+        </div>
+
+        <div class="form-group" id="phoneGroup">
+          <label>Phone <span class="required">*</span></label>
+          <input id="phone">
+          <span class="error-text" id="phoneError"></span>
+        </div>
+
+        <div class="form-group" id="ageGroup">
+          <label>Age</label>
+          <input id="age" type="number">
+        </div>
+
+        <div class="form-group" id="genderGroup">
+          <label>Gender <span class="required">*</span></label>
+          <select id="gender">
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+          <span class="error-text" id="genderError"></span>
+        </div>
+
+        <div class="form-group" id="countryGroup">
+          <label>Country <span class="required">*</span></label>
+          <select id="country">
+            <option value="">Select Country</option>
+            <option>India</option>
+            <option>United States</option>
+          </select>
+          <span class="error-text" id="countryError"></span>
+        </div>
+
+        <div class="form-group" id="stateGroup">
+          <label>State <span class="required">*</span></label>
+          <select id="state"><option value="">Select State</option></select>
+          <span class="error-text" id="stateError"></span>
+        </div>
+
+        <div class="form-group" id="cityGroup">
+          <label>City <span class="required">*</span></label>
+          <select id="city"><option value="">Select City</option></select>
+          <span class="error-text" id="cityError"></span>
+        </div>
+
+        <div class="form-group" id="addressGroup">
+          <label>Address</label>
+          <input id="address">
+        </div>
+
+        <div class="form-group" id="passwordGroup">
+          <label>Password <span class="required">*</span></label>
+          <input id="password" type="password">
+          <div class="password-strength"><div id="passwordStrengthBar" class="password-strength-bar"></div></div>
+          <span class="error-text" id="passwordError"></span>
+        </div>
+
+        <div class="form-group" id="confirmPasswordGroup">
+          <label>Confirm Password <span class="required">*</span></label>
+          <input id="confirmPassword" type="password">
+          <span class="error-text" id="confirmPasswordError"></span>
+        </div>
+
+        <div class="form-group" id="termsGroup">
+          <label>Terms <span class="required">*</span></label>
+          <input type="checkbox" id="terms">
+          <span class="error-text" id="termsError"></span>
+        </div>
+
+      </div>
+
+      <button id="submitBtn" type="submit">Submit Registration</button>
+
+    </form>
+  </div>
+
+
+<script>
+// Fix: Wait for DOM to load
+document.addEventListener('DOMContentLoaded', function() {
+
+/* COUNTRY → STATE → CITY */
+const locations = {
+  "India": {
+    "Gujarat":["Ahmedabad","Surat","Vadodara"],
+    "Maharashtra":["Mumbai","Pune"]
+  },
+  "United States": {
+    "California":["Los Angeles","San Diego"],
+    "Texas":["Houston","Dallas"]
+  }
+};
+
+// Get elements safely
+const country = document.getElementById('country');
+const state = document.getElementById('state');
+const city = document.getElementById('city');
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const email = document.getElementById('email');
+const phone = document.getElementById('phone');
+const password = document.getElementById('password');
+const confirmPassword = document.getElementById('confirmPassword');
+const gender = document.getElementById('gender');
+const terms = document.getElementById('terms');
+const submitBtn = document.getElementById('submitBtn');
+const pwBar = document.getElementById('passwordStrengthBar');
+const formSuccessMessage = document.getElementById('formSuccessMessage');
+
+country.onchange = () => {
+  state.innerHTML = "<option value=''>Select State</option>";
+  city.innerHTML = "<option value=''>Select City</option>";
+  if (!locations[country.value]) return;
+  Object.keys(locations[country.value]).forEach(s=>{
+    state.innerHTML += `<option>${s}</option>`;
+  });
+  updateSubmit();
+};
+
+state.onchange = () => {
+  city.innerHTML = "<option value=''>Select City</option>";
+  if (!locations[country.value]?.[state.value]) return;
+  locations[country.value][state.value].forEach(c=>{
+    city.innerHTML += `<option>${c}</option>`;
+  });
+  updateSubmit();
+};
+
+/* PASSWORD STRENGTH */
+password.oninput = () => {
+  let s=0; let v=password.value;
+  if(v.length>=8) s++;
+  if(/[A-Z]/.test(v)) s++;
+  if(/[0-9]/.test(v)) s++;
+  if(/[^a-zA-Z0-9]/.test(v)) s++;
+  pwBar.className = "password-strength-bar";
+  if(s===0) return;
+  if(s<=2) pwBar.classList.add("strength-weak");
+  else if(s===3) pwBar.classList.add("strength-medium");
+  else pwBar.classList.add("strength-strong");
+  updateSubmit();
+};
+
+/* ENABLE SUBMIT BUTTON */
+function updateSubmit(){
+  const ok =
+    firstName.value.trim() &&
+    lastName.value.trim() &&
+    email.value.trim() &&
+    phone.value.trim() &&
+    password.value.trim() &&
+    confirmPassword.value.trim() &&
+    gender.value &&
+    country.value &&
+    state.value &&
+    city.value &&
+    terms.checked;
+
+  if(ok) {
+    submitBtn.classList.add("enabled");
+  } else {
+    submitBtn.classList.remove("enabled");
+  }
+}
+
+// Attach event listeners to all inputs
+document.querySelectorAll("input, select").forEach(
+  e=>e.addEventListener("input", updateSubmit)
+);
+document.querySelectorAll("select").forEach(
+  e=>e.addEventListener("change", updateSubmit)
+);
+terms.addEventListener("change", updateSubmit);
+
+/* SUBMIT VALIDATION */
+document.getElementById('registrationForm').onsubmit = e => {
+  e.preventDefault();
+  document.querySelectorAll(".form-group").forEach(g=>g.classList.remove("error"));
+  document.querySelectorAll(".error-text").forEach(e=>e.textContent="");
+
+  let valid=true;
+  function err(id,msg){ 
+    valid=false; 
+    document.getElementById(id+"Group").classList.add("error");
+    document.getElementById(id+"Error").textContent=msg; 
+  }
+
+  if(!firstName.value.trim()) err("firstName","Required");
+  if(!lastName.value.trim()) err("lastName","Required");
+  if(!email.value.includes("@")) err("email","Invalid email");
+  if(phone.value.length<10) err("phone","Invalid phone");
+  if(!gender.value) err("gender","Required");
+  if(!country.value) err("country","Required");
+  if(!state.value) err("state","Required");
+  if(!city.value) err("city","Required");
+  if(password.value.length<8) err("password","Too short");
+  if(confirmPassword.value!==password.value) err("confirmPassword","Mismatch");
+  if(!terms.checked) err("terms","Required");
+
+  if(!valid) return;
+
+  formSuccessMessage.style.display="block";
+  setTimeout(()=>{
+    formSuccessMessage.style.display="none";
+    document.getElementById('registrationForm').reset();
+    submitBtn.classList.remove("enabled");
+    pwBar.className="password-strength-bar";
+  },2000);
+};
+
+// Initialize button state
+updateSubmit();
+
+});
+</script>
+
+</body>
+</html>
